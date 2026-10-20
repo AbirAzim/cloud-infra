@@ -1,5 +1,4 @@
-[![Frontend Masters](https://static.frontendmasters.com/assets/brand/logos/full.png)](https://frontendmasters.com/courses/fullstack-deployment)
-This is a companion repository for the [Modern Deployment](https://frontendmasters.com/courses/fullstack-deployment) course on Frontend Masters. The repository contains an example Go application that will be deployed to AWS.
+This repository contains an example Go application that is deployed to AWS.
 
 ## goals Application
 
@@ -119,13 +118,13 @@ WHERE email = 'user@example.com';
 5. Navigate to http://localhost:8080
 
 
-## Course Resources
+## Deployment Resources
 
-The resources and code snippets below are reference throughout the [Fullstack Deployment: From Containers to Production AWS]() course.
+The resources and code snippets below are used to deploy the application to AWS.
 
 ### General Setup Instructions
 
-To follow along with the course, you will need:
+To deploy the application, you will need:
 
 1. Go version 1.24.2 or later
     - [Download and install Go](https://go.dev/doc/install)
@@ -134,11 +133,11 @@ To follow along with the course, you will need:
     - **Important:** Check "Enable host networking" under `Settings > Resources > Network`
 1. Google Cloud Console
     - Log into the [Google Cloud Console](https://console.cloud.google.com/auth/clients)
-    - You'll create an OAuth Client during the course
+    - You'll need to create an OAuth Client
 1. AWS
     - Create an AWS Root User account and log into the [AWS Console](https://us-east-1.console.aws.amazon.com/console/home)
     - Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-    - In the course, you'll create an Administrator User in IAM for the CLI and [set environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) in your console to authenticate the CLI
+    - Create an Administrator User in IAM for the CLI and [set environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) in your console to authenticate the CLI
 1. Terraform
     - Install the [Terraform CLI](https://developer.hashicorp.com/terraform/install)
 1. Supabase
@@ -197,7 +196,7 @@ Then verify the installation by running `goose -version`
 
 ### Deploying the Service
 
-When you are deploying the fm-fd-service with Terraform, Erik covers some troubleshooting tips throughout the lesson. Here are some additional troubleshooting tips:
+When you are deploying the service with Terraform, here are some troubleshooting tips:
 
 **Clean up your local docker images and push up a fresh image to ECR**
 ```bash
@@ -219,7 +218,7 @@ If you visit ECS and your staging cluster has 0 Container Instances (or there ar
 terraform destroy
 ```
 
-Confirm your terraform configuration matches [this commit on Erik's workshop branch](https://github.com/ALT-F4-LLC/fem-fd-service/tree/94ee588f97cc00f5a13aec486df08a5bc04deb22). Then redeploy the infrastructure with the init, plan and apply commands:
+Confirm your Terraform configuration is correct, then redeploy the infrastructure with the init, plan and apply commands:
 
 ```bash
 terraform init
@@ -229,7 +228,7 @@ terraform apply "terraform.tfplan"
 
 ## Deleting AWS Resources
 
-Once you complete the course, you'll need to remove all the AWS resources to avoid changes:
+When you are finished, you'll need to remove all the AWS resources to avoid changes:
 
 1. Run `terraform destroy` to remove all resources created by Terraform
 1. Navigate to [AWS App Runner](https://us-west-2.console.aws.amazon.com/apprunner/home?region=us-west-2), click on your App Runner instance and choose `Actions > Delete`
