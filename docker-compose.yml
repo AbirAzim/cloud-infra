@@ -3,7 +3,8 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_PASSWORD: password 
-    network_mode: host
+    ports:
+      - "5433:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
 
