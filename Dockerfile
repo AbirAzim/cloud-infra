@@ -1,5 +1,4 @@
-FROM public.ecr.aws/docker/library/golang:1.24.2-alpine
-LABEL version="1.0.1"
+FROM public.ecr.aws/docker/library/golang:1.24.2-alpine AS build
 
 # Set the working directory
 WORKDIR /app
