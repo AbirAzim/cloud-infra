@@ -3,13 +3,87 @@ name: Build and Deploy
 on:
   pull_request:
   push:
-   branches:
-    - main
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - run: make build-imagev
+      # Anonymous pulls from public.ecr.aws hit shared rate limits on GitHub runners
+      - env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | \
+            docker login --username AWS --password-stdin public.ecr.aws
+
+      - run: make build-image
+
+      - env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: make build-image-push
+
+  test:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: make build-image-pull
+
+      - run: make up
+
+      # Read the database URL from SSM Parameter Store
+      - env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          url=$(aws ssm get-parameter --region ap-south-1 --with-decryption \
+            --name arn:aws:ssm:ap-south-1:108359913979:parameter/cloud-infra/postgress-url \
+            --query Parameter.Value --output text)
+          echo "::add-mask::$url"
+          echo "GOOSE_DBSTRING=$url" >> "$GITHUB_ENV"
+
+      - env:
+          GOOSE_DRIVER: postgres
+        run: make build-image-migrate
+
+      - if: always()
+        run: make down
+  deploy:
+    concurrency:
+      cancel-in-progress: false
+      group: deploy-lock
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GOOSE_DRIVER: postgres
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Read the database URL from SSM Parameter Store
+      - run: |
+          url=$(aws ssm get-parameter --region ap-south-1 --with-decryption \
+            --name arn:aws:ssm:ap-south-1:108359913979:parameter/cloud-infra/postgress-url \
+            --query Parameter.Value --output text)
+          echo "::add-mask::$url"
+          echo "GOOSE_DBSTRING=$url" >> "$GITHUB_ENV"
+
+      - run: make build-image-pull
+      - run: make build-image-migrate
+      - run: make build-image-promote
