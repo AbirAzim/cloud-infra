@@ -12,4 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: make build-imagev
+      - run: make build-image
