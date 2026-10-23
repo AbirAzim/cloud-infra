@@ -10,8 +10,9 @@ BUILD_IMAGE := $(AWS_ECR_DOMAIN)/cloud-service
 BUILD_TAG := $(if $(BUILD_TAG),$(BUILD_TAG),latest)
 ECS_CLUSTER := default
 ECS_SERVICE := cloud-service-1527
-DOCKERIZE_HOST := $(shell echo $(GOOSE_DBSTRING) | cut -d "@" -f 2 | cut -d ":" -f 1)
-DOCKERIZE_URL := tcp://$(if $(DOCKERIZE_HOST),$(DOCKERIZE_HOST):5432,localhost:5433)
+# host:port from GOOSE_DBSTRING (postgres://user:pass@host:port/db); port defaults to 5432
+DOCKERIZE_HOST := $(shell echo '$(GOOSE_DBSTRING)' | sed 's/.*@//' | cut -d "/" -f 1 | cut -d "?" -f 1)
+DOCKERIZE_URL := tcp://$(if $(DOCKERIZE_HOST),$(if $(findstring :,$(DOCKERIZE_HOST)),$(DOCKERIZE_HOST),$(DOCKERIZE_HOST):5432),localhost:5433)
 .DEFAULT_GOAL := build
 
 build:

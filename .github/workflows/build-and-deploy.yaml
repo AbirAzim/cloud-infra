@@ -45,7 +45,7 @@ jobs:
 
       - env:
           GOOSE_DBSTRING: ${{ secrets.GOOSE_DBSTRING }}
-          GOOSE_DRIVER: ${{ env.GOOSE_DRIVER }}
+          GOOSE_DRIVER: postgres
         run: make build-image-migrate
 
       - if: always()
