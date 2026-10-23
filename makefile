@@ -1,5 +1,7 @@
 MIGRATION_DIR := migrations
-AWS_PROFILE ?= personal
+# GitHub Actions has no named profile; the AWS CLI uses the credentials from its env instead
+AWS_PROFILE ?= $(if $(GITHUB_ACTIONS),,personal)
+AWS_PROFILE_FLAG := $(if $(AWS_PROFILE),--profile $(AWS_PROFILE))
 AWS_ACCOUNT_ID := 108359913979
 AWS_DEFAULT_REGION := ap-south-1
 AWS_ECR_DOMAIN := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_DEFAULT_REGION).amazonaws.com
@@ -29,7 +31,7 @@ build-image:
 build-image-login:
 	aws ecr get-login-password \
 		--region $(AWS_DEFAULT_REGION) \
-		--profile $(AWS_PROFILE) | docker login \
+		$(AWS_PROFILE_FLAG) | docker login \
 		--username AWS \
 		--password-stdin \
 		$(AWS_ECR_DOMAIN)
@@ -86,7 +88,7 @@ ecs-redeploy:
 		--service $(ECS_SERVICE) \
 		--force-new-deployment \
 		--region $(AWS_DEFAULT_REGION) \
-		--profile $(AWS_PROFILE) \
+		$(AWS_PROFILE_FLAG) \
 		--query "service.deployments[0].status" \
 		--output text
 
