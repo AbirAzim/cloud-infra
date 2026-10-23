@@ -8,6 +8,15 @@
       "Resource": "*"
     },
     {
+      "Sid": "EcrPublicLogin",
+      "Effect": "Allow",
+      "Action": [
+        "ecr-public:GetAuthorizationToken",
+        "sts:GetServiceBearerToken"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "EcrPushPullCloudService",
       "Effect": "Allow",
       "Action": [
