@@ -39,6 +39,8 @@ build-image-login:
 
 build-image-push: build-image build-image-login
 	docker image push $(BUILD_IMAGE):$(GIT_SHA)
+
+build-image-promote: build-image-pull
 	docker image tag $(BUILD_IMAGE):$(GIT_SHA) $(BUILD_IMAGE):$(BUILD_TAG)
 	docker image push $(BUILD_IMAGE):$(BUILD_TAG)
 	$(MAKE) ecs-redeploy

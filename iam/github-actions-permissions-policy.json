@@ -31,6 +31,12 @@
       "Resource": "arn:aws:ecr:ap-south-1:108359913979:repository/cloud-service"
     },
     {
+      "Sid": "ReadDbString",
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:ap-south-1:108359913979:parameter/cloud-infra/postgress-url"
+    },
+    {
       "Sid": "EcsRedeployCloudService",
       "Effect": "Allow",
       "Action": [
