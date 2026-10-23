@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     bio TEXT,
@@ -14,20 +14,20 @@ CREATE TABLE users (
     is_banned BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE administrators (
+CREATE TABLE IF NOT EXISTS administrators (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(255) UNIQUE NOT NULL
 );
 
-CREATE TABLE aspiration_updates (
+CREATE TABLE IF NOT EXISTS aspiration_updates (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
     content TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE likes (
+CREATE TABLE IF NOT EXISTS likes (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
     update_id INTEGER REFERENCES aspiration_updates(id),
@@ -35,14 +35,14 @@ CREATE TABLE likes (
     UNIQUE (user_id, update_id)
 );
 
-CREATE TABLE followers (
+CREATE TABLE IF NOT EXISTS followers (
     follower_id INTEGER REFERENCES users(id),
     followed_id INTEGER REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (follower_id, followed_id)
 );
 
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,
     update_id INTEGER REFERENCES aspiration_updates(id),
     user_id INTEGER REFERENCES users(id),
